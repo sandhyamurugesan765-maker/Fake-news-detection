@@ -1,0 +1,86 @@
+<!-- templates/detect.html -->
+{% extends "base.html" %}
+
+{% block title %}Detect News{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-search"></i> Fake News Detection</h2>
+                    <p>Enter a news article to analyze its authenticity</p>
+                </div>
+                <div class="card-body">
+                    <form id="detect-form" method="POST">
+                        <div class="form-group">
+                            <label for="news_text" class="form-label">News Article Text</label>
+                            <textarea class="form-control" id="news_text" name="news_text" rows="8" 
+                                      placeholder="Paste the news article you want to analyze here..."></textarea>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-info-circle"></i> Minimum 50 characters for accurate analysis
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-chart-line"></i> Analyze News
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('news_text').value = ''">
+                            <i class="fas fa-eraser"></i> Clear
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <div id="result-container" style="display: none;"></div>
+            
+            {% if result %}
+            <div class="card">
+                <div class="result-{% if result.prediction == 'Real' %}real{% else %}fake{% endif %}">
+                    <h3><i class="fas fa-robot"></i> Analysis Result</h3>
+                    <p><strong>Prediction:</strong> 
+                        <span class="badge badge-{% if result.prediction == 'Real' %}success{% else %}danger{% endif %}">
+                            {{ result.prediction }} News
+                        </span>
+                    </p>
+                    <p><strong>Confidence:</strong> {{ "%.1f"|format(result.confidence) }}%</p>
+                    
+                    <div class="progress">
+                        <div class="progress-bar progress-real" style="width: {{ result.real_probability * 100 }}%">
+                            Real: {{ "%.1f"|format(result.real_probability * 100) }}%
+                        </div>
+                        <div class="progress-bar progress-fake" style="width: {{ result.fake_probability * 100 }}%">
+                            Fake: {{ "%.1f"|format(result.fake_probability * 100) }}%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h4>Analysis Details:</h4>
+                        <ul>
+                            <li>Text Length: {{ news_text|length }} characters</li>
+                            <li>Word Count: {{ news_text.split()|length }} words</li>
+                        </ul>
+                    </div>
+                    
+                    <button onclick="shareResult('{{ result.prediction }}', {{ result.confidence }})" class="btn btn-info">
+                        <i class="fas fa-share-alt"></i> Share Result
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Store result for sharing if needed
+    {% if result %}
+    window.currentResult = {
+        prediction: '{{ result.prediction }}',
+        confidence: {{ result.confidence }}
+    };
+    {% endif %}
+</script>
+{% endblock %}

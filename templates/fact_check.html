@@ -1,0 +1,60 @@
+<!-- templates/fact_check.html -->
+{% extends "base.html" %}
+
+{% block title %}Fact Check{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Fact Check a Claim</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="claim" class="form-label">Enter a claim to fact-check</label>
+                            <textarea class="form-control" id="claim" name="claim" rows="4" 
+                                      placeholder="Example: 'Vaccines cause autism' or 'The Earth is flat'"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-info w-100">Fact Check</button>
+                    </form>
+                </div>
+            </div>
+            
+            {% if result %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Fact Check Results</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert 
+                        {% if result.verdict == 'True' %}alert-success
+                        {% elif result.verdict == 'False' %}alert-danger
+                        {% elif result.verdict == 'Misleading' %}alert-warning
+                        {% else %}alert-secondary{% endif %}">
+                        <h5>Verdict: {{ result.verdict }}</h5>
+                        <p>Confidence: {{ "%.1f"|format(result.confidence) }}%</p>
+                    </div>
+                    
+                    <h6>Analysis Details:</h6>
+                    <ul>
+                        <li>Sentiment Score: {{ "%.2f"|format(result.analysis.sentiment_score) }}</li>
+                        <li>Fake Indicators Found: {{ result.analysis.fake_indicators }}</li>
+                        <li>Real Indicators Found: {{ result.analysis.real_indicators }}</li>
+                    </ul>
+                    
+                    <h6>Sources:</h6>
+                    <ul>
+                        {% for source in result.sources %}
+                        <li><a href="{{ source.url }}" target="_blank">{{ source.name }}</a>: {{ source.verdict }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
